@@ -8,10 +8,11 @@
   <body>
     <h1>Recommendation System</h1>
     <form id="recommendation-form">
-      <label for="user_id">Enter User ID or Item ID:</label>
-      <input type="text" id="user_id" name="user_id" required />
+      <label for="item_id">Enter Item ID:</label>
+      <input type="text" id="item_id" name="item_id" required />
       <button type="submit">Get Recommendations</button>
     </form>
+    <p>Item IDs for testing: -1676378465482420452, -8052188270551570124</p>
 
     <h2>Recommendations:</h2>
     <div id="results"></div>
@@ -23,7 +24,7 @@
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const userID = document.querySelector("#user_id").value;
+        const itemID = document.querySelector("#item_id").value;
 
         try {
           const response = await fetch("/recommend", {
@@ -31,7 +32,7 @@
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ user_id: userID }),
+            body: JSON.stringify({ item_id: itemID }),
           });
 
           if (!response.ok) {
@@ -41,27 +42,16 @@
           const data = await response.json();
 
           resultsDiv.innerHTML = `
-            <h3>Collaborative Model:</h3>
-            <ul>
-              ${data.collaborative
-                .slice(0, 5)
-                .map((id) => `<li>${id}</li>`)
-                .join("")}
-            </ul>
-            <h3>Content Model:</h3>
-            <ul>
-              ${data.content
-                .slice(0, 5)
-                .map((id) => `<li>${id}</li>`)
-                .join("")}
-            </ul>
-            <h3>Azure Model:</h3>
-            <ul>
-              ${data.azure
-                .slice(0, 5)
-                .map((id) => `<li>${id}</li>`)
-                .join("")}
-            </ul>
+            <h3>Collaborative Filtering:</h3>
+            <ul>${data.collaborative
+              .map((id) => `<li>${id}</li>`)
+              .join("")}</ul>
+
+            <h3>Content-Based Filtering:</h3>
+            <ul>${data.content.map((id) => `<li>${id}</li>`).join("")}</ul>
+
+            <h3>Azure ML Recommendations:</h3>
+            <ul>${data.azure.map((id) => `<li>${id}</li>`).join("")}</ul>
           `;
         } catch (error) {
           resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
