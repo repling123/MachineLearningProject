@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recommendation System</title>
+  </head>
+  <body>
+    <h1>Recommendation System</h1>
+    <form id="recommendation-form">
+      <label for="user_id">Enter User ID or Item ID:</label>
+      <input type="text" id="user_id" name="user_id" required />
+      <button type="submit">Get Recommendations</button>
+    </form>
+
+    <h2>Recommendations:</h2>
+    <div id="results"></div>
+
+    <script>
+      const form = document.querySelector("#recommendation-form");
+      const resultsDiv = document.querySelector("#results");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const userID = document.querySelector("#user_id").value;
+
+        try {
+          const response = await fetch("/recommend", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: userID }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch recommendations.");
+          }
+
+          const data = await response.json();
+
+          resultsDiv.innerHTML = `
+            <h3>Collaborative Model:</h3>
+            <ul>
+              ${data.collaborative
+                .slice(0, 5)
+                .map((id) => `<li>${id}</li>`)
+                .join("")}
+            </ul>
+            <h3>Content Model:</h3>
+            <ul>
+              ${data.content
+                .slice(0, 5)
+                .map((id) => `<li>${id}</li>`)
+                .join("")}
+            </ul>
+            <h3>Azure Model:</h3>
+            <ul>
+              ${data.azure
+                .slice(0, 5)
+                .map((id) => `<li>${id}</li>`)
+                .join("")}
+            </ul>
+          `;
+        } catch (error) {
+          resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        }
+      });
+    </script>
+  </body>
+</html>
